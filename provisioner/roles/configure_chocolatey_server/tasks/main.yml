@@ -1,0 +1,12 @@
+---
+- name: Chocolatey Server | Remove DNS Entry
+  include_tasks: remove_dns_entry.yml
+  when: teardown|bool
+
+- name: Chocolatey Server | Deploy package
+  include_tasks: deploy_package.yml
+  when: not teardown
+
+- name: Chocolatey Server | Create DNS entry
+  include_tasks: create_dns_entry.yml
+  when: not teardown

@@ -1,0 +1,29 @@
+---
+- name: check if the skynet nupkg was already deployed
+  win_stat:
+    path: '{{ opt_chocolatey_server_path if opt_chocolatey_server_path is defined else "C:\tools" }}\chocolatey.server\App_Data\Packages\skynet'
+  register: skynet_nypkg_stat
+
+- name: Deploy the skynet nupkg
+  block:
+  - name: Chocolatey Server | Create temp directory structure
+    win_file:
+      path: C:\Temp
+      state: directory
+
+  - name: Chocolatey Server | Copy the package to the chocolatey server
+    win_copy:
+        src: skynet/skynet.1.0.0.nupkg 
+        dest: C:\Temp\skynet.1.0.0.nupkg
+
+  - name: Chocolatey Server | Push package to the chocolatey server repository
+    win_command: choco push skynet.1.0.0.nupkg --source http://{{ ansible_host }}/chocolatey --api-key={{ opt_chocolatey_server_api_token }} --force
+    args:
+      chdir: C:\Temp\ 
+    register: package_push_out
+  when: not skynet_nypkg_stat.stat.exists
+
+- name: Chocolatey Server | Cleaning up the temp directory structure
+  win_file:
+    path: C:\Temp
+    state: absent

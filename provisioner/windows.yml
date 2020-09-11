@@ -21,3 +21,17 @@
     - git
   roles:
     - gitlab-client
+
+- name: Configure Chocolatey Server
+  hosts: chocolatey
+  gather_facts: false
+  vars:
+    opt_chocolatey_server_api_token: eb82582c-2214-4ce9-9689-8c823ae33e45
+    opt_chocolatey_server_credentials:
+      ansible: '{{ "chocolatey" | hash("sha1") | upper }}'
+  tags:
+    - chocolatey
+  roles:
+    - jborean93.win_chocolatey_server
+    - configure_chocolatey_server
+  

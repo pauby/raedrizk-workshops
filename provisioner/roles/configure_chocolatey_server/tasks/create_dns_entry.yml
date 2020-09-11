@@ -1,0 +1,13 @@
+---
+- name: Chocolatey Server | Create DNS record
+  become: false
+  route53:
+    state: "{{ s3_state }}"
+    zone: "{{workshop_dns_zone}}"
+    record: "nuget.{{ec2_name_prefix|lower}}.{{workshop_dns_zone}}"
+    type: A
+    overwrite: true
+    value: "{{ansible_host}}"
+    wait: true
+  delegate_to: localhost
+  register: route53_status

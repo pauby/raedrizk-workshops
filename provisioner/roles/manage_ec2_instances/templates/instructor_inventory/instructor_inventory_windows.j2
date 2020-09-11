@@ -20,6 +20,14 @@ ansible_port=22
 ansible_user={{ ec2_info['skylight_rhel8_gitlab']['username'] }}
 ansible_ssh_private_key_file="{{ playbook_dir }}/{{ ec2_name_prefix }}/{{ ec2_name_prefix }}-private.pem"
 
+[chocolatey:vars]
+ansible_connection=winrm
+ansible_winrm_transport=credssp
+ansible_winrm_server_cert_validation=ignore
+ansible_port=5986
+ansible_user={{ hostvars['chocolatey'].ansible_user }}
+ansible_password="{{ hostvars['chocolatey'].ansible_password }}"
+
 {% if attendance %}
 [attendance]
 {%   for host in hostvars %}
