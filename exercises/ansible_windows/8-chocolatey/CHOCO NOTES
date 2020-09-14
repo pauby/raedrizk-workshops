@@ -1,0 +1,4 @@
+why you would want to use an internal nuget v2 repo vs public: 
+
+- install from a location going over 5 nodes rate limit is enforced  
+- 75 million hits a day on the public repo
