@@ -6,8 +6,8 @@ So what is Chocolatey anyways? Simply put, Chocolatey is a package manager for W
 **TODO:** ADD TEXT ON CHOCOLATEY CONFIGURATION SCENARIOS - SHOULD COME FROM THE CHOCOLATEY TEAM *
 *************************************************************************************************
 
-<br>
-=======================================================
+
+*************************************************************************************************
 
 Section 1: The `win_chocolatey` module
 =======================================================
@@ -253,8 +253,7 @@ After running the new Template, examine the `deubg` task message, and compare th
 
 ![Run Job Template](images/8-update-packages-job-run-successful.png)
 
-<br>
-=======================================================
+*************************************************************************************************
 
 Section 2: Chocolatey facts and configurations
 =======================================================
@@ -429,7 +428,10 @@ The playbook should run and make the configuration changes, and the output from 
 
 ![Run Job Template](images/8-chocolatey-configuration-job-run-2-successful.png)
 
-<br>
+
+*************************************************************************************************
+
+Section 3: Sources and features
 =======================================================
 
 <br><br>
