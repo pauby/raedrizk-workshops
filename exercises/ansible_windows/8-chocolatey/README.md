@@ -8,6 +8,7 @@ So what is Chocolatey anyways? Simply put, Chocolatey is a package manager for W
 
 <br>
 =======================================================
+
 Section 1: The `win_chocolatey` module
 =======================================================
 
@@ -427,6 +428,9 @@ Commit your changes and push them to source control, sync your project in Ansibl
 The playbook should run and make the configuration changes, and the output from the last `debug` task showing the value of the `ansible_chocolatey.config` section should reflect those changes and show the new values for `cacheLocation` and `commandExecutionTimeoutSeconds`.
 
 ![Run Job Template](images/8-chocolatey-configuration-job-run-2-successful.png)
+
+<br>
+=======================================================
 
 <br><br>
 [Click here to return to the Ansible for Windows Workshop](../readme.md)
