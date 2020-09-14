@@ -159,11 +159,6 @@ Now head back to Ansible Tower, and sync your Project so that Tower Picks up the
 
 Once this is complete, We will create a new job template. Select **Templates** and click on the ![Add](images/add.png) icon, and select Job Template. Use the following values for your new Template
 
-Step 3:
--------
-
-Complete the form using the following values
-
 | Key         | Value                                            | Note |
 |-------------|--------------------------------------------------|------|
 | Name        | Chocolatey - Install Packages                    |      |
@@ -188,7 +183,7 @@ Click SAVE and then Click LAUNCH to run the job. The job should run successfully
 >
 > By now you should be familiar with the flow of creating or editing playbooks, commiting your changes and pushing them to git. You should also be comfortable with refreshing your project, creating and running job templates in Ansible Tower. Later steps will no longer list each and every step to do so.
 
-## Step 2 - Updating all installed packages
+## Step 3 - Updating all installed packages
 
 The `win_chocolatey` module can do more than just install packages, it is also used to uninstall and update packages. The action the module does is based on the value you pass to the `state` parameter. Some of the options you can pass include:
 
@@ -236,7 +231,7 @@ The other tasks are there so that we can verify the versions of `nodejs` and `py
 Now go ahead and make sure your new playbook is in Git, and that Ansible Tower can see it, and then create and run a new Job template with the following values:
 > **Tip**
 >
-> Sine Almost everything will be similar to the first Job template we created to install packages, you can `copy` that job template by going to `Tempates` and clicking on the ![copy](images/8-copy.png) icon next to the `Chocolatey - Install Packages` template. This will create a copy of that template that you can then Edit and make the changes to the name, descriptin and playbook to run. If you prefer you can also create a playbook from scratch, the choice is yours
+> Sine Almost everything will be similar to the first Job template we created to install packages, you can `copy` that job template by going to `Tempates` and clicking on the ![copy](images/8-copy.png) icon next to the `Chocolatey - Install Packages` template. This will create a copy of that template that you can then Edit by clicking on its name, and make the changes to the name, descriptin and playbook to run. If you prefer you can also create a playbook from scratch, the choice is yours
 
 | Key         | Value                                            | Note |
 |-------------|--------------------------------------------------|------|
@@ -245,11 +240,15 @@ Now go ahead and make sure your new playbook is in Git, and that Ansible Tower c
 | JOB TYPE    | Run                                              |      |
 | INVENTORY   | Workshop Inventory                               |      |
 | PROJECT     | Ansible Workshop Project                         |      |
-| PLAYBOOK    | `chocolatey/update__packages.yml`                |      |
+| PLAYBOOK    | `chocolatey/update_packages.yml`                |      |
 | CREDENTIAL  | Type: **Machine**. Name: **Workshop Credential** |      |
 | LIMIT       | windows                                          |      |
 | OPTIONS     |                                                  |      |
 
+
+After running the new Template, examine the `deubg` task message, and compare the versions to the ones from the `install_packages` job output. The versions should be higher as those packages were updates (the `git` package that we installed using an adhoc command will also be checked for an update - unlikely that there will be one after minutes of installation).
+
+![Run Job Template](images/8-update-packages-job-run-successful.png)
 
 <br><br>
 [Click here to return to the Ansible for Windows Workshop](../readme.md)
