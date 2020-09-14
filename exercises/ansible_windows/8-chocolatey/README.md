@@ -59,14 +59,14 @@ You should now have an editor open in the right pane that can be used for creati
 
 <!-- TODO: INSERT Image of Empty text editor here-->
 <!-- ![Empty install\_packages.yml](images/8-vscode-create-install_playbook.png) -->
-![Empty install\_packages.yml](images/placeholder.png)
+![Empty install\_packages.yml](images/8-chocolatey-empty-install_packages-editor.png)
 
 First we will define our play:
 
 ```bash
 ---
 - name: Install Specific versoins of packages using chocolatey
-  hosts: win
+  hosts: all
   gather_facts: false
   vars:
     choco_packages:
@@ -117,7 +117,7 @@ The completed playbook `install_packages.yml` should look like this:
 ```bash
 ---
 - name: Install Specific versoins of packages using chocolatey
-  hosts: win
+  hosts: all
   gather_facts: false
   vars:
     choco_packages:
@@ -151,12 +151,104 @@ Now that the playbook is ready:
 1. Push the committed changes to your repository by clicking the circular arrows.
 1. (Optional) Verify that your code is in git by going to GitLab using the information under **GitLab Access**.
 
+
+Now head back to Ansible Tower, and sync your Project so that Tower Picks up the new playbook. Click
+**Projects** and then click the sync icon next to your project. 
+
+![Project Sync](images/8-project-sync.png)
+
+Once this is complete, We will create a new job template. Select **Templates** and click on the ![Add](images/add.png) icon, and select Job Template. Use the following values for your new Template
+
+Step 3:
+-------
+
+Complete the form using the following values
+
+| Key         | Value                                            | Note |
+|-------------|--------------------------------------------------|------|
+| Name        | Chocolatey - Install Packages                    |      |
+| Description | Template for the install_packages playbook       |      |
+| JOB TYPE    | Run                                              |      |
+| INVENTORY   | Workshop Inventory                               |      |
+| PROJECT     | Ansible Workshop Project                         |      |
+| PLAYBOOK    | `chocolatey/install_packages.yml`                |      |
+| CREDENTIAL  | Type: **Machine**. Name: **Workshop Credential** |      |
+| LIMIT       | windows                                          |      |
+| OPTIONS     |                                                  |      |
+
+<br>
+
+![Create Job Template](images/8-create-install-packages-job-template.png)
+
+Click SAVE and then Click LAUNCH to run the job. The job should run successfully and you should be able to see Ansible looping and installing the packages specified in out variable
+
+![Run Job Template](images/8-install-packages-job-run-successful.png)
+
 > **Tip**
 >
-> By now you should be familiar with the flow of creating or editing playbooks, commiting your changes and pushing them to git. Later steps will no longer list each and every step to do so.
+> By now you should be familiar with the flow of creating or editing playbooks, commiting your changes and pushing them to git. You should also be comfortable with refreshing your project, creating and running job templates in Ansible Tower. Later steps will no longer list each and every step to do so.
+
+## Step 2 - Updating all installed packages
+
+The `win_chocolatey` module can do more than just install packages, it is also used to uninstall and update packages. The action the module does is based on the value you pass to the `state` parameter. Some of the options you can pass include:
+
+- `present`: Will ensure the package is installed.
+- `absent` : Will ensure the package is not installed.
+- `latest`: Will ensure the package is installed to the latest available version.
+	
+The last playbook did not explicitly define and set a value for `state`, so the default value `present` was used as the set value to the state parameter to install packages, however we installed older versions of packages on purpose, so now we want to update those packages.
+
+In Visual studio code, create a new file under the `chocolatey` folder with the name `update_packages.yml`. In this playbook we will create a play that uses the `windows_chocolatey` module with `latest` passed in as a value to the `state` parameter. Since we want to update all the packages previously installed by chocolatey, no specific package name will be provided to the `name` parameter, instead the value `all` will be used.
+
+> **Tip**
+>
+> Information on using `all` as a value that will be set to the `name` attribute can be found in the `win_chocolatey`'s module [docs](https://docs.ansible.com/ansible/latest/modules/win_chocolatey_module.html). Always check the documentation of a module that you are using for the first time, often there will be useful information that will save you a lot of work.
 
 
+The contents of `update_packages.yml` are:
 
+```bash
+---
+- name: Update all packages using chocolatey
+  hosts: all
+  gather_facts: false
+  tasks:
+
+  - name: Update all installed packages
+    win_chocolatey:
+      name: all
+      state: latest
+
+  - name: Check python version
+    win_command: python --version
+    register: check_python_version
+
+  - name: Check nodejs version
+    win_command: node --version
+    register: check_node_version
+
+  - debug:
+      msg: Python Version is {{ check_python_version.stdout_lines[0] }} and NodeJS version is {{ check_node_version.stdout_lines[0] }}
+```
+
+The other tasks are there so that we can verify the versions of `nodejs` and `python` after the update task has been run. And that's it, simple right?! 
+
+Now go ahead and make sure your new playbook is in Git, and that Ansible Tower can see it, and then create and run a new Job template with the following values:
+> **Tip**
+>
+> Sine Almost everything will be similar to the first Job template we created to install packages, you can `copy` that job template by going to `Tempates` and clicking on the ![copy](images/8-copy.png) icon next to the `Chocolatey - Install Packages` template. This will create a copy of that template that you can then Edit and make the changes to the name, descriptin and playbook to run. If you prefer you can also create a playbook from scratch, the choice is yours
+
+| Key         | Value                                            | Note |
+|-------------|--------------------------------------------------|------|
+| Name        | Chocolatey - Update Packages                    |      |
+| Description | Template for the update_packages playbook       |      |
+| JOB TYPE    | Run                                              |      |
+| INVENTORY   | Workshop Inventory                               |      |
+| PROJECT     | Ansible Workshop Project                         |      |
+| PLAYBOOK    | `chocolatey/update__packages.yml`                |      |
+| CREDENTIAL  | Type: **Machine**. Name: **Workshop Credential** |      |
+| LIMIT       | windows                                          |      |
+| OPTIONS     |                                                  |      |
 
 
 <br><br>
