@@ -6,6 +6,8 @@ So what is Chocolatey anyways? Simply put, Chocolatey is a package manager for W
 **TODO:** ADD TEXT ON CHOCOLATEY CONFIGURATION SCENARIOS - SHOULD COME FROM THE CHOCOLATEY TEAM *
 *************************************************************************************************
 
+<br>
+=======================================================
 Section 1: The `win_chocolatey` module
 =======================================================
 
@@ -63,7 +65,7 @@ You should now have an editor open in the right pane that can be used for creati
 
 First we will define our play:
 
-```bash
+```yaml
 ---
 - name: Install Specific versoins of packages using chocolatey
   hosts: all
@@ -81,7 +83,7 @@ Since we will not need or use any of the facts gathered by Ansible,  we have dis
 
 Next we will add our tasks:
 
-```bash
+```yaml
   tasks:
 
   - name: Install specific versions of packages sequentially
@@ -114,7 +116,7 @@ We added 4 tasks to the tasks section:
 
 The completed playbook `install_packages.yml` should look like this:
 
-```bash
+```yaml
 ---
 - name: Install Specific versoins of packages using chocolatey
   hosts: all
@@ -202,7 +204,7 @@ In Visual studio code, create a new file under the `chocolatey` folder with the 
 
 The contents of `update_packages.yml` are:
 
-```bash
+```yaml
 ---
 - name: Update all packages using chocolatey
   hosts: all
@@ -235,12 +237,12 @@ Now go ahead and make sure your new playbook is in Git, and that Ansible Tower c
 
 | Key         | Value                                            | Note |
 |-------------|--------------------------------------------------|------|
-| Name        | Chocolatey - Update Packages                    |      |
-| Description | Template for the update_packages playbook       |      |
+| Name        | Chocolatey - Update Packages                     |      |
+| Description | Template for the update_packages playbook        |      |
 | JOB TYPE    | Run                                              |      |
 | INVENTORY   | Workshop Inventory                               |      |
 | PROJECT     | Ansible Workshop Project                         |      |
-| PLAYBOOK    | `chocolatey/update_packages.yml`                |      |
+| PLAYBOOK    | `chocolatey/update_packages.yml`                 |      |
 | CREDENTIAL  | Type: **Machine**. Name: **Workshop Credential** |      |
 | LIMIT       | windows                                          |      |
 | OPTIONS     |                                                  |      |
@@ -249,6 +251,182 @@ Now go ahead and make sure your new playbook is in Git, and that Ansible Tower c
 After running the new Template, examine the `deubg` task message, and compare the versions to the ones from the `install_packages` job output. The versions should be higher as those packages were updates (the `git` package that we installed using an adhoc command will also be checked for an update - unlikely that there will be one after minutes of installation).
 
 ![Run Job Template](images/8-update-packages-job-run-successful.png)
+
+<br>
+=======================================================
+
+Section 2: Chocolatey facts and configurations
+=======================================================
+
+Even though the `win_chocolatey` module is what actually is used to manage packages with chocolatey, it is not the only chocolatey module available in Ansible, there are other modules to help you manage and configure chocolatey on your windows targets. In this exercise we will take a look at two of them: `win_chocolatey_facts` and `win_chocolatey_config`
+
+## Step 1 - Gathering chocolatey facts 
+
+The first module we will use is the `win_chocolatey_facts` module. This module is used to gather information from Chocolatey, such as installed packages, configuration, feature and sources, which is useful for tasks suck as report generation, or conditionals defined on other tasks. 
+
+> **Tip**
+>
+> Read more on the `win_chocolatey_facts` in the [docs](https://docs.ansible.com/ansible/latest/modules/win_chocolatey_facts_module.html).
+
+So let's take a closer look at the information gathered by this module by writing a simple playbook to collect and display the collected information.
+
+In Visual Studio Code, under the `chocolatey` folder, create a new file called `chocolatey_conguration.yml`. The contents of that file should be as follows:
+
+```yaml
+---
+- name: Chocolatey Facts and configuration
+  hosts: all
+  gather_facts: false
+  tasks:
+
+  - name: Gather facts from chocolatey
+    win_chocolatey_facts:
+
+  - name: Displays the gathered facts
+    debug:
+      var: ansible_chocolatey
+```
+
+The first task uses the `win_chocolatey_facts` to gather all the available information from chocolatey on the target Windows machine, and will store this information in a variable named `ansible_chocolatey`, which we are using the `debug` module to print the contents of to examine them closer. 
+
+Add your new playbook to your source control repo, and sync your project in Ansible Tower, then create and run a new Job template with the following values:
+
+
+| Key         | Value                                            | Note |
+|-------------|--------------------------------------------------|------|
+| Name        | Chocolatey - Facts and configuration             |      |
+| Description | Template for the chocolatey_conguration playbook |      |
+| JOB TYPE    | Run                                              |      |
+| INVENTORY   | Workshop Inventory                               |      |
+| PROJECT     | Ansible Workshop Project                         |      |
+| PLAYBOOK    | `chocolatey/chocolatey_conguration.yml`          |      |
+| CREDENTIAL  | Type: **Machine**. Name: **Workshop Credential** |      |
+| LIMIT       | windows                                          |      |
+| OPTIONS     |                                                  |      |
+
+<br>
+
+The output of the job should show you the contents of the `ansible_chocolatey` variable collected in the first task. 
+
+![Run Job Template](images/8-chocolatey-configuration-job-run-1-successful.png)
+
+Scroll through the output and observe the values, you can see the configurations of the chocolatey client on the windows target, the enabled and disabled features, the installed packages (do you see the packages we installed in previous exercises?) as well as the sources from which we are installing packages (more on this later!). Note that this information is in a JSON format, so you can access individual values by traversing the object tree. For example if I am only interested in information on the installed packages to let's say generate a report of installed packages, I can use the `ansible_chocolatey.packages` key to access those values.
+
+<br>
+
+> **Tip**
+>
+> We really did not need to use a `debug` task just to see the information collected by the `win_chocolatey_facts` module, instead, in Ansible Tower's job output pane click on the result of running the task on the Windows target, which will open the host events dialog for that specific host, which shows information about the host affected by the selected event and the output of that event (In this case, the JSON object returned by the `win_chocolatey_facts` module run)
+
+<br>
+
+## Step 2 - Configuring chocolatey
+
+In the previous step, we saw that we can gather the configurations of the chocolatey client on the windows target using the `win_chocolatey_facts` module, but what if we want to modify those configurations? well, there is a module for that!
+
+The `win_chocolatey_config` module can be used to manage chocolatey configuratins by changing the values of configuration options, or unsetting them all together. 
+
+<br>
+
+> **Tip**
+>
+> Read more on the `win_chocolatey_config` in the [docs](https://docs.ansible.com/ansible/latest/modules/win_chocolatey_config_module.html).
+
+<br>
+
+> **Tip**
+>
+> Read more on Chocolatey configuration [here](https://chocolatey.org/docs/chocolatey-configuration).
+
+We will cgange the values of two configuration options: `cacheLocation` and `commandExecutionTimeoutSeconds`. In the output of the previous step we saw that the `cacheLocation` was unset or did not have a value configured - the default setting, and that the value for `commandExecutionTimeoutSeconds` was set to the default value of 2700. We will modify those configuarion options to:
+
+- set `cacheLocation` to `C:\ChocoCache`.
+- set `commandExecutionTimeoutSeconds` to 1 hour or `3600` seconds.
+
+In Visual Studio Code, edit the `chocolatey_conguration.yml` playbook, to add the following tasks:
+
+```yaml
+  - name: Create a directory for the new Chocolatey caching directory
+    win_file:
+      path: C:\ChocoCache
+      state: directory
+  
+  - name: Configure Chocolatey to use the new directory as the cache location
+    win_chocolatey_config:
+      name: cacheLocation
+      state: present
+      value: C:\ChocoCache
+
+  - name: Change the Execution Timeout Setting
+    win_chocolatey_config:
+      name: commandExecutionTimeoutSeconds
+      state: present
+      value: 3600
+
+  - name: ReGather facts from chocolatey after new reconfiguring
+    win_chocolatey_facts:
+
+  - name: Displays the gathered facts
+    debug:
+      var: ansible_chocolatey.config
+```
+
+These new tasks will perform the following:
+
+- Create the directory `C:\ChocoCache` using the `win_file` module.
+- Modify the value of `cacheLocation` to the newly created directory using `win_chocolatey_config`.
+- Modify the value of `commandExecutionTimeoutSeconds` to `3600`.
+- Re gather the chocolatey facts after modifying the configuration values.
+- And Finally print out the `config` section from the refreshed chocolatey facts.
+
+The contents of the `chocolatey_conguration.yml` playbook should now look like this:
+
+```yaml
+---
+- name: Chocolatey Facts and configuration
+  hosts: all
+  gather_facts: false
+  tasks:
+
+  - name: Gather facts from chocolatey
+    win_chocolatey_facts:
+
+  - name: Displays the gathered facts
+    debug:
+      var: ansible_chocolatey
+
+  - name: Create a directory for the new Chocolatey caching directory
+    win_file:
+      path: C:\ChocoCache
+      state: directory
+  
+  - name: Configure Chocolatey to use the new directory as the cache location
+    win_chocolatey_config:
+      name: cacheLocation
+      state: present
+      value: C:\ChocoCache
+
+  - name: Change the Execution Timeout Setting
+    win_chocolatey_config:
+      name: commandExecutionTimeoutSeconds
+      state: present
+      value: 3600
+
+  - name: ReGather facts from chocolatey after new reconfiguring
+    win_chocolatey_facts:
+
+  - name: Displays the gathered facts
+    debug:
+      var: ansible_chocolatey.config
+```
+Commit your changes and push them to source control, sync your project in Ansible Tower and run the `Chocolatey - Facts and configuration` job template.
+> **Tip**
+>
+> Back in [exercise 1](../1-tower), when you created the project in Ansible Tower, you checked an option to `UPDATE REVISION ON LAUNCH` - so we did not really need to refresh the project in Tower, but just in case that option was missed...
+
+The playbook should run and make the configuration changes, and the output from the last `debug` task showing the value of the `ansible_chocolatey.config` section should reflect those changes and show the new values for `cacheLocation` and `commandExecutionTimeoutSeconds`.
+
+![Run Job Template](images/8-chocolatey-configuration-job-run-2-successful.png)
 
 <br><br>
 [Click here to return to the Ansible for Windows Workshop](../readme.md)
