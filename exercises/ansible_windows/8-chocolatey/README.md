@@ -434,5 +434,171 @@ The playbook should run and make the configuration changes, and the output from 
 Section 3: Sources and features
 =======================================================
 
+So far all the packages we have installed have been coming from Chocolatey's public repository. While this is useful for demo purposes, single users and this workshop, when considering package management within an dorganiation, you should consider setting up and using an internal Nuget 
+
+why you would want to use an internal `NuGet V2` repository vs using the public one for many reasons, including: 
+
+- Control over the release cycle of software
+- Being able to package and distribute your own software from the same source
+- Avoiding any restrictions defined on public repositories! for example the source we have been using so far will enforce a rate limit on more than 5 install requests originating from a a single source or IP Address as this repository gets around 75 million hits a day!
+
+Setting up the server is beyond the scope of this workshop, however we will be looking into configuring your managed hosts with a new source or repository to use as a source for packages.
+
+
+> **Tip**
+>
+> Consider looking on [Ansible Galaxy](https://galaxy.ansible.com/) for roles that may be used to setup a server, or write your own Ansible Playbook to install and configure the server
+
+For this workshop a private `NuGet V2` repository was setup and loaded up with a sample package. We will be using another Ansible module, `win_chocolatey_source` to configure that source on our managed Windows host, and install a package from that source.
+
+The source will have three main parameters that need to be defined: URL, username and password. So far we have been using Tower's excellent credential management system to manage our Machine and source control credentials, but there is no built in type for a Nuget V2 repository, However Ansible Tower gives us the ability to define our own Credentail Types, define new crednetials using the newly defined type and use them in job templates just like any other credentials in Tower.
+
+In Anible Tower, click **Credential Types** on the left panel, and then click on the ![Add](images/add.png) icon to create a new credential type. Use the following information to define the new type:
+
+**NAME:** NuGet V2 Repo
+
+**DESCRIPTION:** Credential Type representing a NuGet V2 Repo
+
+**INPUT CONFIGURATION:**
+```yaml
+fields:
+  - id: username
+    type: string
+    label: username
+  - id: password
+    type: string
+    label: password
+    secret: true
+  - id: url
+    type: string
+    label: url
+required:
+  - username
+  - password
+  - url
+```
+
+**INJECTOR CONFIGURATION:**
+```yaml
+extra_vars:
+  repo_username: '{{ username }}'
+  repo_password: '{{ password }}'
+  repo_url: '{{ url }}'
+```
+
+`NAME` and `DESCRIPTION` correspond to the name and the description of the new credential type (the name that will be displayed when you are defining a new credential). 
+
+The `INPUT CONFIGURATION` section defines the fields that the user will define for the new Credetial type, and the properties of each field, including the id we can use to accedd the value in that field, its label, its data type and if it is a secret. We also specify which fields are required and which are optional (In our case all fields are required).
+
+The `INJECTOR CONFIGURATION` Sections define how Ansible Tower will expose or inject the values captured from the fields of the credential definition to the playbook. Credetials can be injected several different ways such as passing them in as `extra_cars` (which is what we are doing here) or setting values to environment variables or even writing them to a temporary file. Since we decided the values into our playbook as `extra_vars`, we will also define which field ID will map to which variable name. In our case:
+- values in the field with the ID `username` will be injected as a variable with the name `repo_username`
+- values in the secret field with the ID `password` will be injected as a variable with the name `repo_password`
+- values in the field with the ID `url` will be injected as a variable with the name `repo_url`
+
+These will be the variable names we use in our playbooks to access the credential values.
+
+Your credential type definition should now look like this:
+
+![Credential Type](images/8-nuget-credential-type-def.png)
+
+Click the `Save` Button, and with that we have a new Credential Type in Ansible Tower that we can use to manage our NuGet Repository Crednetials With.
+
+> **Tip**
+>
+> Read more on custome credential types in the [docs](https://docs.ansible.com/ansible-tower/latest/html/userguide/credential_types.html)
+
+Now we need to define the actual credential for out repository, so click **Credentials** on the left panel, and then click on the ![Add](images/add.png) icon to create a new credential. Use the following information for the Credential definition:
+
+| Key          | Value                                                 |                                                    |
+|--------------|-------------------------------------------------------|----------------------------------------------------|
+| Name         | NuGet Credential                                      |                                                    |
+| Description  | Credential for workshop NuGet Repo                    |                                                    |
+| Organization | Default                                               |                                                    |
+| Type         | NuGet V2 Repo                                         |                                                    |
+| USERNAME     | ansible                                               |                                                    |
+| PASSWORD     | chocolatey                                            | All lower case letters                             |
+| URL          | http://nuget.`WORKSHOP_ID`.open.redhat.com/chocolatey | Replace `WORKSHOP_ID` with your unique workshop ID |
+
+<br>
+
+The new credential should look like this:
+
+
+![Credential](images/8-nuget-credential-def.png)
+
+Click Save, and now we are ready to start our playbook.
+
+In Visual Studio Code, under the `chocolatey` folder, create a new file called `chocolatey_custom_repo.yml`. The contents of that file should be as follows:
+
+```yaml
+---
+- name: Add a new source an install a package from that source
+  hosts: all
+  gather_facts: false
+  tasks:
+  - name: Create a new HTTP source for the workshop_nuget_repo
+    win_chocolatey_source:
+      name: workshop_nuget_repo
+      state: present
+      source: "{{ repo_url }}"
+      source_username: "{{ repo_username }}"
+      source_password: "{{ repo_password }}"
+
+  - name: Gather facts from chocolatey
+    win_chocolatey_facts:
+
+  - name: Displays the configured chocolatey sources
+    debug:
+      var: ansible_chocolatey.sources
+
+  - name: Install skynet from from the pre configured source
+    win_chocolatey:
+      name: skynet
+      source: workshop_nuget_repo 
+      state: present 
+```
+
+The first task will use the `win_chocolatey_repo` to configure a new chocolatey source. Note that the values for `source`, `source_username` and `source_passwords` are the variable names that we defined in our custom credential type injector section. The second and third tasks will collect the chocolatey_facts and display the `ansible_chocolatey.sources` section of the collected facts just to confirm that the new source has been added, and the fourth and final task will use `win_chocolatey` to install a package with the name of `skynet` from the newly configured `workshop_nuget_repo` source.
+
+> **Tip**
+>
+> Read more on the `win_chocolatey_source` module in the [docs](https://docs.ansible.com/ansible/latest/modules/win_chocolatey_source_module.html).
+
+Add your new playbook to your source control repo, and sync your project in Ansible Tower, then create and run a new Job template with the following values:
+
+
+| Key         | Value                                                                                                       | Note |
+|-------------|-------------------------------------------------------------------------------------------------------------|------|
+| Name        | Chocolatey - Custom Repo                                                                                    |      |
+| Description | Template for the chocolatey_custom_repo playbook                                                            |      |
+| JOB TYPE    | Run                                                                                                         |      |
+| INVENTORY   | Workshop Inventory                                                                                          |      |
+| PROJECT     | Ansible Workshop Project                                                                                    |      |
+| PLAYBOOK    | `chocolatey/chocolatey_custom_repo.yml`                                                                     |      |
+| CREDENTIAL  | Type: **Machine**. Name: **Workshop Credential**  `AND` Type: **NuGet V2 Repo**. Name: **NuGet Credential** |      |
+| LIMIT       | windows                                                                                                     |      |
+| OPTIONS     |                                                                                                             |      |
+
+> **Tip**
+>
+> Note that this job template contains more than one credential! You can add ad many credentials to your job templates based on usage as long as you only have **one credential per credential type**
+
+Your Job template should look like this:
+
+![Job Template](images/8-chocolatey-custom-repo-template-definition.png)
+
+Save and launch the Job template, the job should complete successfully, and you should see the newly configured source in the output, as well as a `CHANGED` status for the `skynet`installation task:
+
+![Successfull Job Run](images/8-chocolatey-custom-repo-job-run-successfull.png)
+
+<br><br>
+
+And thats it, this exercise covered most chocolatey related Ansible modules available (with the exeption of `win_chocolatey_feature` which you can read about [here](https://docs.ansible.com/ansible/latest/modules/win_chocolatey_feature_module.html) and their usage, hopefully you got a taste of the possibilities by using Ansible together with Chocolatey to manage your Windows packages.
+
+*********************************************************************************************************
+**TODO:** Will not include the section on breaking and fixing with win_chocolatey_feature due to timing *
+*********************************************************************************************************
+
+
 <br><br>
 [Click here to return to the Ansible for Windows Workshop](../readme.md)
