@@ -1,11 +1,14 @@
 This exercise aims to introduce how Ansible makes it easy to control all aspects of managing Windows software using Chocolatey. We will cover Installing, updating and uninstalling packages, managing different sources, configuring chocolatey clients and other common tasks that a system administrator would take on. 
 
-So what is Chocolatey anyways? Simply put, Chocolatey is a package manager for Windows. Chocolatey aims to simplify software management making it easier to automate your entire Windows software lifecycle.
+So what is Chocolatey anyways? Simply put, Chocolatey is a package management system for Windows. Chocolatey aims to simplify software management, making it easier to automate your entire Windows software lifecycle.
 
-*************************************************************************************************
-**TODO:** ADD TEXT ON CHOCOLATEY CONFIGURATION SCENARIOS - SHOULD COME FROM THE CHOCOLATEY TEAM *
-*************************************************************************************************
+The open source Chocolatey client offers basic package management functionality, while the Chocolatey For Business suite provides an advanced feature set. Some highlights include:
 
+* Package Builder allows you to take any EXE, MSI, zip, or script and automatically turn it into a Chocolatey package in as little as 5 seconds (and figures out the installer silent arguments for you).
+* Package Internalizer takes the 8000+ packages that maintainers have already built for you in the Chocolatey Community Repository, and creates localized offline versions for you to use internally (including dependencies);
+* Package Synchronizer will allow you to create Chocolatey packages for applications listed in Programs and Features, and allows you to manage them like any other package.
+* Chocolatey Self-Service GUI allows end-users the ability to manage packages without requiring admin rights or elevated permissions.
+* Chocolatey Central Management is a web dashboard and API (similar to Ansible Tower) giving you that high-level overview and reporting of your entire estate of endpoints.
 
 *************************************************************************************************
 
