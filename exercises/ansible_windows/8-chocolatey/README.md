@@ -13,10 +13,10 @@ Section 1: The `win_chocolatey` module
 =======================================================
 
 
-## Step 1 - Install a package using an adhoc command
+## Step 1 - Install a package using an ad-hoc command
 
 
-To start, we will use an adhoc comman to install `git` using the `win_chocolatey` module. The `win_chocolatey` module is used to manage packages on a Windows system using Chocolatey. 
+To start, we will use an ad-hoc command to install `git` using the `win_chocolatey` module. The `win_chocolatey` module is used to manage packages on a Windows system using Chocolatey. 
 <br>
 To get started click **Inventories** on the left panel, and then click the name of our Inventory **Workshop Inventory**. Now that you are on the Inventory Details page, we will need to go select our Host. So click **HOSTS**.
 
@@ -40,11 +40,11 @@ Fill out this form as follows:
 Once you click **LAUNCH** you will be redirected to the Job log. 
 
 
-In the job output from the, you should see a result that looks like this:
+In the job output, you should see a result that looks like this:
 
 ![Win\_Chocolatey Job Output](images/8-chocolatey-run-win_chocolatey-result.png)
 
-We see that the output reports a CHANGED status to indicate that `git` was installed. The results also shows a warning that the Chocolatey client was missing from the system, so it was installed as a part of this task run. Future tasks that use the `win_chocolatey` module should now detect the client and use it without the need to install anything. to verify, re-run the job by clicking on the rocket icon in the **DETAILS** section, the output now should not have a warning, and will also not report any changes, but instead a SUCCESS status as the `win_chocolatey` module (like most Ansible modules) is idempotent (The run will also take less time because as the previous run installed 2 packages, this run installs none).
+We see that the output reports a CHANGED status to indicate that `git` was installed. The results also shows a warning that the Chocolatey client was missing from the system, so it was installed as a part of this task run. Future tasks that use the `win_chocolatey` module should now detect the client and use it without the need to install anything. To verify, re-run the job by clicking on the rocket icon in the **DETAILS** section, the output now should not have a warning, and will also not report any changes, but instead a SUCCESS status as the `win_chocolatey` module (like most Ansible modules) is idempotent (the run will also take less time because as the previous run installed 2 packages, this run installs none).
 
 ![Win\_Chocolatey re run Job Output](images/8-chocolatey-rerun-win_chocolatey-result.png)
 
@@ -53,7 +53,7 @@ And just like that we have `git` installed.
 
 ## Step 2 - Install multiple packages with specific versions
 
-In the last step we installed one package in an ad-hoc fashion, however in reality it is more likely that we would want to include package installation as one step in a multi step play. It is also likely that we would want to install multiple packages (possibly even specific versions of said packages), In the exercise we will be doing just that.
+In the last step we installed one package in an ad-hoc fashion, however in reality it is more likely that we would want to include package installation as one step in a multi step play. It is also likely that we would want to install multiple packages (possibly even specific versions of said packages). In this exercise we will be doing just that.
 
 Let's start by going back to Visual Studio Code. Under the *WORKSHOP_PROJECT* section Create a directory called **chocolatey** and a file called
 `install_packages.yml`
@@ -68,7 +68,7 @@ First we will define our play:
 
 ```yaml
 ---
-- name: Install Specific versoins of packages using chocolatey
+- name: Install Specific versions of packages using Chocolatey
   hosts: all
   gather_facts: false
   vars:
@@ -80,7 +80,7 @@ First we will define our play:
 
 ```
 
-Since we will not need or use any of the facts gathered by Ansible,  we have disabled fact gathering by setting `gather_facts: false` to decrease overhead. We also defined one dictionary variable named `choco_packages` under the `vars` directive to hold the names and versions of the packages we want to install using chocolatey
+Since we will not need or use any of the facts gathered by Ansible,  we have disabled fact gathering by setting `gather_facts: false` to decrease overhead. We also defined one dictionary variable named `choco_packages` under the `vars` directive to hold the names and versions of the packages we want to install using Chocolatey.
 
 Next we will add our tasks:
 
@@ -108,7 +108,7 @@ Next we will add our tasks:
 We added 4 tasks to the tasks section:
 
 - The first task uses the `win_chocolatey` module, and will loop over the `choco_packages` variable to install each product with the specified version
-- The second and third tasks use the `win_command` module to execute commands to check the version of `python` and `node` respectivly, registering the output of each.
+- The second and third tasks use the `win_command` module to execute commands to check the version of `python` and `node` respectively, registering the output of each.
 - The fourth and final task used the `debug` module to display a message containing the information gathered in steps 2 and 3.
 
 > **Tip**
@@ -119,7 +119,7 @@ The completed playbook `install_packages.yml` should look like this:
 
 ```yaml
 ---
-- name: Install Specific versoins of packages using chocolatey
+- name: Install Specific versoins of packages using Chocolatey
   hosts: all
   gather_facts: false
   vars:
@@ -149,18 +149,18 @@ The completed playbook `install_packages.yml` should look like this:
 ```
 
 Now that the playbook is ready:
-1. save your work by Clicking `File > Save` from the menu (or using the ctrl+s shortcut).
-1. Commit your changes to git - use a relevant commit message such as *Adding install\_packages.yml*
+
+1. Save your work by Clicking `File > Save` from the menu (or using the Ctrl+S shortcut).
+1. Commit your changes to git - use a relevant commit message such as *Adding install\_packages.yml*.
 1. Push the committed changes to your repository by clicking the circular arrows.
 1. (Optional) Verify that your code is in git by going to GitLab using the information under **GitLab Access**.
 
 
-Now head back to Ansible Tower, and sync your Project so that Tower Picks up the new playbook. Click
-**Projects** and then click the sync icon next to your project. 
+Now head back to Ansible Tower, and sync your Project so that Tower Picks up the new playbook. Click **Projects** and then click the sync icon next to your project. 
 
 ![Project Sync](images/8-project-sync.png)
 
-Once this is complete, We will create a new job template. Select **Templates** and click on the ![Add](images/add.png) icon, and select Job Template. Use the following values for your new Template
+Once this is complete, we will create a new job template. Select **Templates** and click on the ![Add](images/add.png) icon, and select Job Template. Use the following values for your new Template:
 
 | Key         | Value                                            | Note |
 |-------------|--------------------------------------------------|------|
@@ -178,13 +178,13 @@ Once this is complete, We will create a new job template. Select **Templates** a
 
 ![Create Job Template](images/8-create-install-packages-job-template.png)
 
-Click SAVE and then Click LAUNCH to run the job. The job should run successfully and you should be able to see Ansible looping and installing the packages specified in out variable
+Click SAVE and then Click LAUNCH to run the job. The job should run successfully and you should be able to see Ansible looping and installing the packages specified in our variable
 
 ![Run Job Template](images/8-install-packages-job-run-successful.png)
 
 > **Tip**
 >
-> By now you should be familiar with the flow of creating or editing playbooks, commiting your changes and pushing them to git. You should also be comfortable with refreshing your project, creating and running job templates in Ansible Tower. Later steps will no longer list each and every step to do so.
+> By now you should be familiar with the flow of creating or editing playbooks, committing your changes and pushing them to git. You should also be comfortable with refreshing your project, creating and running job templates in Ansible Tower. Later steps will no longer list each and every step to do so.
 
 ## Step 3 - Updating all installed packages
 
@@ -196,7 +196,7 @@ The `win_chocolatey` module can do more than just install packages, it is also u
 	
 The last playbook did not explicitly define and set a value for `state`, so the default value `present` was used as the set value to the state parameter to install packages, however we installed older versions of packages on purpose, so now we want to update those packages.
 
-In Visual studio code, create a new file under the `chocolatey` folder with the name `update_packages.yml`. In this playbook we will create a play that uses the `windows_chocolatey` module with `latest` passed in as a value to the `state` parameter. Since we want to update all the packages previously installed by chocolatey, no specific package name will be provided to the `name` parameter, instead the value `all` will be used.
+In Visual Studio Code, create a new file under the `chocolatey` folder with the name `update_packages.yml`. In this playbook we will create a play that uses the `win_chocolatey` module with `latest` passed in as a value to the `state` parameter. Since we want to update all the packages previously installed by Chocolatey, no specific package name will be provided to the `name` parameter, instead the value `all` will be used.
 
 > **Tip**
 >
@@ -207,7 +207,7 @@ The contents of `update_packages.yml` are:
 
 ```yaml
 ---
-- name: Update all packages using chocolatey
+- name: Update all packages using Chocolatey
   hosts: all
   gather_facts: false
   tasks:
@@ -229,12 +229,12 @@ The contents of `update_packages.yml` are:
       msg: Python Version is {{ check_python_version.stdout_lines[0] }} and NodeJS version is {{ check_node_version.stdout_lines[0] }}
 ```
 
-The other tasks are there so that we can verify the versions of `nodejs` and `python` after the update task has been run. And that's it, simple right?! 
+The other tasks are there so that we can verify the versions of `nodejs` and `python` after the update task has been run. And that's it, simple right?
 
 Now go ahead and make sure your new playbook is in Git, and that Ansible Tower can see it, and then create and run a new Job template with the following values:
 > **Tip**
 >
-> Sine Almost everything will be similar to the first Job template we created to install packages, you can `copy` that job template by going to `Tempates` and clicking on the ![copy](images/8-copy.png) icon next to the `Chocolatey - Install Packages` template. This will create a copy of that template that you can then Edit by clicking on its name, and make the changes to the name, descriptin and playbook to run. If you prefer you can also create a playbook from scratch, the choice is yours
+> Sine Almost everything will be similar to the first job template we created to install packages, you can `copy` that job template by going to `Tempates` and clicking on the ![copy](images/8-copy.png) icon next to the `Chocolatey - Install Packages` template. This will create a copy of that template that you can then Edit by clicking on its name, and make the changes to the name, description and playbook to run. If you prefer you can also create a playbook from scratch, the choice is yours
 
 | Key         | Value                                            | Note |
 |-------------|--------------------------------------------------|------|
@@ -258,11 +258,11 @@ After running the new Template, examine the `deubg` task message, and compare th
 Section 2: Chocolatey facts and configurations
 =======================================================
 
-Even though the `win_chocolatey` module is what actually is used to manage packages with chocolatey, it is not the only chocolatey module available in Ansible, there are other modules to help you manage and configure chocolatey on your windows targets. In this exercise we will take a look at two of them: `win_chocolatey_facts` and `win_chocolatey_config`
+Even though the `win_chocolatey` module is what actually is used to manage packages with Chocolatey, it is not the only Chocolatey module available in Ansible, there are other modules to help you manage and configure Chocolatey on your Windows targets. In this exercise we will take a look at two of them: `win_chocolatey_facts` and `win_chocolatey_config`
 
-## Step 1 - Gathering chocolatey facts 
+## Step 1 - Gathering Chocolatey facts 
 
-The first module we will use is the `win_chocolatey_facts` module. This module is used to gather information from Chocolatey, such as installed packages, configuration, feature and sources, which is useful for tasks suck as report generation, or conditionals defined on other tasks. 
+The first module we will use is the `win_chocolatey_facts` module. This module is used to gather information from Chocolatey, such as installed packages, configuration, features and sources, which is useful for tasks suck as report generation, or conditionals defined on other tasks. 
 
 > **Tip**
 >
@@ -274,12 +274,12 @@ In Visual Studio Code, under the `chocolatey` folder, create a new file called `
 
 ```yaml
 ---
-- name: Chocolatey Facts and configuration
+- name: Chocolatey Facts and Configuration
   hosts: all
   gather_facts: false
   tasks:
 
-  - name: Gather facts from chocolatey
+  - name: Gather facts from Chocolatey
     win_chocolatey_facts:
 
   - name: Displays the gathered facts
@@ -287,9 +287,9 @@ In Visual Studio Code, under the `chocolatey` folder, create a new file called `
       var: ansible_chocolatey
 ```
 
-The first task uses the `win_chocolatey_facts` to gather all the available information from chocolatey on the target Windows machine, and will store this information in a variable named `ansible_chocolatey`, which we are using the `debug` module to print the contents of to examine them closer. 
+The first task uses `win_chocolatey_facts` to gather all the available information from Chocolatey on the target Windows machine, and will store this information in a variable named `ansible_chocolatey`, which is using the `debug` module to print the contents of to examine them closer. 
 
-Add your new playbook to your source control repo, and sync your project in Ansible Tower, then create and run a new Job template with the following values:
+Add your new playbook to your source control repo, and sync your project in Ansible Tower, then create and run a new job template with the following values:
 
 
 | Key         | Value                                            | Note |
@@ -310,7 +310,7 @@ The output of the job should show you the contents of the `ansible_chocolatey` v
 
 ![Run Job Template](images/8-chocolatey-configuration-job-run-1-successful.png)
 
-Scroll through the output and observe the values, you can see the configurations of the chocolatey client on the windows target, the enabled and disabled features, the installed packages (do you see the packages we installed in previous exercises?) as well as the sources from which we are installing packages (more on this later!). Note that this information is in a JSON format, so you can access individual values by traversing the object tree. For example if I am only interested in information on the installed packages to let's say generate a report of installed packages, I can use the `ansible_chocolatey.packages` key to access those values.
+Scroll through the output and observe the values, you can see the configuration of the Chocolatey client on the Windows target, the enabled and disabled features, the installed packages (do you see the packages we installed in previous exercises?) as well as the sources from which we are installing packages (more on this later!). Note that this information is in a JSON format, so you can access individual values by traversing the object tree. For example if I am only interested in information on the installed packages to let's say generate a report of installed packages, I can use the `ansible_chocolatey.packages` key to access those values.
 
 <br>
 
@@ -320,11 +320,11 @@ Scroll through the output and observe the values, you can see the configurations
 
 <br>
 
-## Step 2 - Configuring chocolatey
+## Step 2 - Configuring Chocolatey
 
-In the previous step, we saw that we can gather the configurations of the chocolatey client on the windows target using the `win_chocolatey_facts` module, but what if we want to modify those configurations? well, there is a module for that!
+In the previous step, we saw that we can gather the configurations of the Chocolatey client on the windows target using the `win_chocolatey_facts` module, but what if we want to modify those configurations? Well, there is a module for that!
 
-The `win_chocolatey_config` module can be used to manage chocolatey configuratins by changing the values of configuration options, or unsetting them all together. 
+The `win_chocolatey_config` module can be used to manage Chocolatey configurations by changing the values of configuration options, or unsetting them all together. 
 
 <br>
 
@@ -338,7 +338,7 @@ The `win_chocolatey_config` module can be used to manage chocolatey configuratin
 >
 > Read more on Chocolatey configuration [here](https://chocolatey.org/docs/chocolatey-configuration).
 
-We will cgange the values of two configuration options: `cacheLocation` and `commandExecutionTimeoutSeconds`. In the output of the previous step we saw that the `cacheLocation` was unset or did not have a value configured - the default setting, and that the value for `commandExecutionTimeoutSeconds` was set to the default value of 2700. We will modify those configuarion options to:
+We will change the values of two configuration options: `cacheLocation` and `commandExecutionTimeoutSeconds`. In the output of the previous step we saw that the `cacheLocation` was unset or did not have a value configured - the default setting, and that the value for `commandExecutionTimeoutSeconds` was set to the default value of 2700. We will modify those configuration options to:
 
 - set `cacheLocation` to `C:\ChocoCache`.
 - set `commandExecutionTimeoutSeconds` to 1 hour or `3600` seconds.
@@ -363,7 +363,7 @@ In Visual Studio Code, edit the `chocolatey_conguration.yml` playbook, to add th
       state: present
       value: 3600
 
-  - name: ReGather facts from chocolatey after new reconfiguring
+  - name: ReGather facts from Chocolatey after new reconfiguring
     win_chocolatey_facts:
 
   - name: Displays the gathered facts
@@ -376,19 +376,19 @@ These new tasks will perform the following:
 - Create the directory `C:\ChocoCache` using the `win_file` module.
 - Modify the value of `cacheLocation` to the newly created directory using `win_chocolatey_config`.
 - Modify the value of `commandExecutionTimeoutSeconds` to `3600`.
-- Re gather the chocolatey facts after modifying the configuration values.
-- And Finally print out the `config` section from the refreshed chocolatey facts.
+- Re gather the Chocolatey facts after modifying the configuration values.
+- And Finally print out the `config` section from the refreshed Chocolatey facts.
 
 The contents of the `chocolatey_conguration.yml` playbook should now look like this:
 
 ```yaml
 ---
-- name: Chocolatey Facts and configuration
+- name: Chocolatey Facts and Configuration
   hosts: all
   gather_facts: false
   tasks:
 
-  - name: Gather facts from chocolatey
+  - name: Gather facts from Chocolatey
     win_chocolatey_facts:
 
   - name: Displays the gathered facts
@@ -412,14 +412,14 @@ The contents of the `chocolatey_conguration.yml` playbook should now look like t
       state: present
       value: 3600
 
-  - name: ReGather facts from chocolatey after new reconfiguring
+  - name: ReGather facts from Chocolatey after new reconfiguring
     win_chocolatey_facts:
 
   - name: Displays the gathered facts
     debug:
       var: ansible_chocolatey.config
 ```
-Commit your changes and push them to source control, sync your project in Ansible Tower and run the `Chocolatey - Facts and configuration` job template.
+Commit your changes and push them to source control, sync your project in Ansible Tower and run the `Chocolatey - Facts and Configuration` job template.
 > **Tip**
 >
 > Back in [exercise 1](../1-tower), when you created the project in Ansible Tower, you checked an option to `UPDATE REVISION ON LAUNCH` - so we did not really need to refresh the project in Tower, but just in case that option was missed...
@@ -434,13 +434,13 @@ The playbook should run and make the configuration changes, and the output from 
 Section 3: Sources and features
 =======================================================
 
-So far all the packages we have installed have been coming from Chocolatey's public repository. While this is useful for demo purposes, single users and this workshop, when considering package management within an dorganiation, you should consider setting up and using an internal Nuget 
+So far all the packages we have installed have been coming from Chocolatey's public repository. While this is useful for demo purposes, single users, and this workshop, when considering package management within an organization, you should consider setting up and using an internal Nuget v2 repository.
 
-why you would want to use an internal `NuGet V2` repository vs using the public one for many reasons, including: 
+There are many reasons why you would want to use an internal `NuGet V2` repository vs using the public one, including: 
 
 - Control over the release cycle of software
 - Being able to package and distribute your own software from the same source
-- Avoiding any restrictions defined on public repositories! for example the source we have been using so far will enforce a rate limit on more than 5 install requests originating from a a single source or IP Address as this repository gets around 75 million hits a day!
+- Avoiding any restrictions defined on public repositories! For example the source we have been using so far will enforce a rate limit originating from a a single source or IP Address as this repository gets around 75 million hits a day! See the [docs for more information](https://chocolatey.org/docs/community-packages-disclaimer#rate-limiting).
 
 Setting up the server is beyond the scope of this workshop, however we will be looking into configuring your managed hosts with a new source or repository to use as a source for packages.
 
@@ -451,9 +451,9 @@ Setting up the server is beyond the scope of this workshop, however we will be l
 
 For this workshop a private `NuGet V2` repository was setup and loaded up with a sample package. We will be using another Ansible module, `win_chocolatey_source` to configure that source on our managed Windows host, and install a package from that source.
 
-The source will have three main parameters that need to be defined: URL, username and password. So far we have been using Tower's excellent credential management system to manage our Machine and source control credentials, but there is no built in type for a Nuget V2 repository, However Ansible Tower gives us the ability to define our own Credentail Types, define new crednetials using the newly defined type and use them in job templates just like any other credentials in Tower.
+The source will have three main parameters that need to be defined: URL, username and password. So far we have been using Tower's excellent credential management system to manage our Machine and source control credentials, but there is no built in type for a Nuget V2 repository, However Ansible Tower gives us the ability to define our own Credential Types, define new credentials using the newly defined type and use them in job templates just like any other credentials in Tower.
 
-In Anible Tower, click **Credential Types** on the left panel, and then click on the ![Add](images/add.png) icon to create a new credential type. Use the following information to define the new type:
+In Ansible Tower, click **Credential Types** on the left panel, and then click on the ![Add](images/add.png) icon to create a new credential type. Use the following information to define the new type:
 
 **NAME:** NuGet V2 Repo
 
@@ -486,28 +486,28 @@ extra_vars:
   repo_url: '{{ url }}'
 ```
 
-`NAME` and `DESCRIPTION` correspond to the name and the description of the new credential type (the name that will be displayed when you are defining a new credential). 
+`NAME` and `DESCRIPTION` correspond to the name and the description of the new Credential Type (the name that will be displayed when you are defining a new credential). 
 
-The `INPUT CONFIGURATION` section defines the fields that the user will define for the new Credetial type, and the properties of each field, including the id we can use to accedd the value in that field, its label, its data type and if it is a secret. We also specify which fields are required and which are optional (In our case all fields are required).
+The `INPUT CONFIGURATION` section defines the fields that the user will define for the new Credential Type, and the properties of each field, including the ID we can use to access the value in that field, its label, its data type, and if it is a secret. We also specify which fields are required and which are optional (in our case all fields are required).
 
-The `INJECTOR CONFIGURATION` Sections define how Ansible Tower will expose or inject the values captured from the fields of the credential definition to the playbook. Credetials can be injected several different ways such as passing them in as `extra_cars` (which is what we are doing here) or setting values to environment variables or even writing them to a temporary file. Since we decided the values into our playbook as `extra_vars`, we will also define which field ID will map to which variable name. In our case:
+The `INJECTOR CONFIGURATION` Sections define how Ansible Tower will expose or inject the values captured from the fields of the credential definition to the playbook. Credentials can be injected in several different ways such as passing them in as `extra_vars` (which is what we are doing here) or setting values to environment variables or even writing them to a temporary file. Since we decided the values into our playbook are `extra_vars`, we will also define which field ID will map to which variable name. In our case:
 - values in the field with the ID `username` will be injected as a variable with the name `repo_username`
 - values in the secret field with the ID `password` will be injected as a variable with the name `repo_password`
 - values in the field with the ID `url` will be injected as a variable with the name `repo_url`
 
 These will be the variable names we use in our playbooks to access the credential values.
 
-Your credential type definition should now look like this:
+Your Credential Type definition should now look like this:
 
 ![Credential Type](images/8-nuget-credential-type-def.png)
 
-Click the `Save` Button, and with that we have a new Credential Type in Ansible Tower that we can use to manage our NuGet Repository Crednetials With.
+Click the `Save` Button, and with that we have a new Credential Type in Ansible Tower that we can use to manage our NuGet Repository Credentials With.
 
 > **Tip**
 >
-> Read more on custome credential types in the [docs](https://docs.ansible.com/ansible-tower/latest/html/userguide/credential_types.html)
+> Read more on Custom Credential Types in the [docs](https://docs.ansible.com/ansible-tower/latest/html/userguide/credential_types.html)
 
-Now we need to define the actual credential for out repository, so click **Credentials** on the left panel, and then click on the ![Add](images/add.png) icon to create a new credential. Use the following information for the Credential definition:
+Now we need to define the actual credential for our repository, so click **Credentials** on the left panel, and then click on the ![Add](images/add.png) icon to create a new credential. Use the following information for the Credential definition:
 
 | Key          | Value                                                 |                                                    |
 |--------------|-------------------------------------------------------|----------------------------------------------------|
@@ -544,10 +544,10 @@ In Visual Studio Code, under the `chocolatey` folder, create a new file called `
       source_username: "{{ repo_username }}"
       source_password: "{{ repo_password }}"
 
-  - name: Gather facts from chocolatey
+  - name: Gather facts from Chocolatey
     win_chocolatey_facts:
 
-  - name: Displays the configured chocolatey sources
+  - name: Displays the configured Chocolatey sources
     debug:
       var: ansible_chocolatey.sources
 
@@ -558,7 +558,7 @@ In Visual Studio Code, under the `chocolatey` folder, create a new file called `
       state: present 
 ```
 
-The first task will use the `win_chocolatey_repo` to configure a new chocolatey source. Note that the values for `source`, `source_username` and `source_passwords` are the variable names that we defined in our custom credential type injector section. The second and third tasks will collect the chocolatey_facts and display the `ansible_chocolatey.sources` section of the collected facts just to confirm that the new source has been added, and the fourth and final task will use `win_chocolatey` to install a package with the name of `skynet` from the newly configured `workshop_nuget_repo` source.
+The first task will use the `win_chocolatey_repo` to configure a new Chocolatey source. Note that the values for `source`, `source_username` and `source_password` are the variable names that we defined in our Custom Credential Type injector section. The second and third tasks will collect the `chocolatey_facts` and display the `ansible_chocolatey.sources` section of the collected facts just to confirm that the new source has been added, and the fourth and final task will use `win_chocolatey` to install a package with the name of `skynet` from the newly configured `workshop_nuget_repo` source.
 
 > **Tip**
 >
@@ -581,19 +581,19 @@ Add your new playbook to your source control repo, and sync your project in Ansi
 
 > **Tip**
 >
-> Note that this job template contains more than one credential! You can add ad many credentials to your job templates based on usage as long as you only have **one credential per credential type**
+> Note that this job template contains more than one credential! You can add as many credentials to your job templates based on usage as long as you only have **one credential per credential type**
 
-Your Job template should look like this:
+Your job template should look like this:
 
 ![Job Template](images/8-chocolatey-custom-repo-template-definition.png)
 
-Save and launch the Job template, the job should complete successfully, and you should see the newly configured source in the output, as well as a `CHANGED` status for the `skynet`installation task:
+Save and launch the job template, the job should complete successfully, and you should see the newly configured source in the output, as well as a CHANGED status for the `skynet` installation task:
 
-![Successfull Job Run](images/8-chocolatey-custom-repo-job-run-successfull.png)
+![Successful Job Run](images/8-chocolatey-custom-repo-job-run-successfull.png)
 
 <br><br>
 
-And thats it, this exercise covered most chocolatey related Ansible modules available (with the exeption of `win_chocolatey_feature` which you can read about [here](https://docs.ansible.com/ansible/latest/modules/win_chocolatey_feature_module.html) and their usage, hopefully you got a taste of the possibilities by using Ansible together with Chocolatey to manage your Windows packages.
+And thats it. This exercise covered most Chocolatey related Ansible modules available (with the exception of `win_chocolatey_feature` which you can read about [here](https://docs.ansible.com/ansible/latest/modules/win_chocolatey_feature_module.html). Hopefully you got a taste of the possibilities by using Ansible together with Chocolatey to manage your Windows packages.
 
 *********************************************************************************************************
 **TODO:** Will not include the section on breaking and fixing with win_chocolatey_feature due to timing *
